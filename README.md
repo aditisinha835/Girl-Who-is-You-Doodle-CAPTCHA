@@ -1,4 +1,4 @@
-Overview
+Overview  
 This project introduces a dual-layer verification pipeline:
 1. Behavioral Verification (Process-level):
 - Analyzes stroke timing, speed variance, path length, and drawing duration.
@@ -8,7 +8,7 @@ This project introduces a dual-layer verification pipeline:
 - Confirms that the final drawing matches the challenge prompt.
 Only submissions passing both layers are accepted.
 
-Architecture
+Architecture  
 Frontend:
 - HTML5 Canvas for drawing input
 - JavaScript captures:
@@ -16,7 +16,8 @@ Frontend:
   - timestamps
   - speed variance
   - pressure data (Pointer Events API)
-  - Sends Base64 image + path data via Fetch API
+  - Sends Base64 image + path data via Fetch API  
+
 Backend:
 - Flask API for:
   - Challenge generation
@@ -27,11 +28,12 @@ Backend:
   - TensorFlow/Keras model integration (inference only)
 - MongoDB for persistent user data storage
 
-Tech Stack
+Tech Stack  
 Frontend:
 - HTML5
 - CSS3
-- JavaScript (Canvas API, Fetch API)
+- JavaScript (Canvas API, Fetch API)  
+
 Backend:
 - Python
 - Flask
