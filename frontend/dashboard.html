@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard - Girl, who is you?</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="dashboard-bg">
+  <header class="top-banner">
+    <img src="/assets/logo.png" alt="Logo" class="banner-logo" />
+    <h1 class="banner-title">Dashboard</h1>
+  </header>
+  
+  <div class="dashboard-content-box">
+    <h3 id="username">Loading...</h3>
+    <p id="useremail"></p>
+
+    <h3>Your Stats</h3>
+    <ul>
+      <li>CAPTCHAs Completed: <span id="captchas"></span></li>
+      <li>Best Doodle: <span id="best-prompt"></span></li>
+      <li>Best Accuracy: <span id="best-confidence"></span></li>
+    </ul>
+
+    <h3>Your Gallery</h3>
+    <div id="gallery" class="gallery"></div>
+
+    <h3>Leaderboard</h3>
+    <ol id="leaderboard"></ol>
+
+    <div id="profile">
+      <h3>Profile</h3>
+      <img id="avatar" src="default-avatar.png" alt="avatar" class="avatar" />
+      <input type="file" id="avatarInput" accept="image/*" />
+    </div>
+
+    <h3>Profile Settings</h3>
+    <button onclick="openChangePassword()" class="secondary">Change Password</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+  const baseUrl = "http://127.0.0.1:5000";
+
+  async function loadDashboard() {
+    try {
+      const res = await fetch(`${baseUrl}/dashboard`, {
+        headers: { "Accept": "application/json" },
+        credentials: "include"
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        window.location.href = "/";
+        return;
+      }
+
+      const user = data.user;
+      document.getElementById("username").innerText = "Name: " + user.name;
+      document.getElementById("useremail").innerText = "Email: " + user.email;
+
+      document.getElementById("captchas").innerText = user.stats?.captchas_completed || 0;
+      document.getElementById("best-prompt").innerText = user.stats?.best_prompt || "None yet";
+      document.getElementById("best-confidence").innerText =
+        user.stats?.best_confidence ? `${(user.stats.best_confidence * 100).toFixed(1)}%` : "N/A";
+
+      const galleryDiv = document.getElementById("gallery");
+      if (user.gallery && user.gallery.length > 0) {
+        galleryDiv.innerHTML = "";
+        user.gallery.forEach(img => {
+          const imgEl = document.createElement("img");
+          imgEl.src = img;
+          imgEl.classList.add("thumb");
+          galleryDiv.appendChild(imgEl);
+        });
+      } else {
+        galleryDiv.innerHTML = "<p>No drawings yet</p>";
+      }
+      
+      const lbRes = await fetch(`${baseUrl}/leaderboard`, { 
+        headers: { "Accept": "application/json" },
+        credentials: "include" 
+      });
+      const lbData = await lbRes.json();
+      if (lbData.success) {
+        const lb = document.getElementById("leaderboard");
+        lb.innerHTML = "";
+        lbData.leaders.forEach((u, i) => {
+          const li = document.createElement("li");
+          li.textContent = `${u.name} — ${u.stats?.captchas_completed || 0} CAPTCHAs`;
+          lb.appendChild(li);
+        });
+      }
+
+      document.getElementById("avatar").src = user.avatar || "assets/default-avatar.jpg";
+      document.getElementById("avatarInput").addEventListener("change", async e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64 = reader.result;
+          await fetch(`${baseUrl}/upload-avatar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ avatar: base64 })
+          });
+          document.getElementById("avatar").src = base64;
+        };
+        reader.readAsDataURL(file);
+      });
+    } catch (err) {
+      console.error("Error loading dashboard:", err);
+      window.location.href = "/";
+    }
+  }
+
+  async function openChangePassword() {
+    const { value: formValues } = await Swal.fire({
+      title: "Change Password",
+      html: `
+        <input id="oldPass" type="password" class="swal2-input" placeholder="Old Password">
+        <input id="newPass" type="password" class="swal2-input" placeholder="New Password (min 8 chars)">
+      `,
+      background: "#fff0f5",
+      color: "#d63384",
+      confirmButtonText: "Update Password",
+      confirmButtonColor: "#ff69b4",
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      preConfirm: () => {
+        const old_password = document.getElementById("oldPass").value.trim();
+        const new_password = document.getElementById("newPass").value.trim();
+
+        if (!old_password || !new_password) {
+          Swal.showValidationMessage("Both fields are required");
+          return false;
+        }
+        if (new_password.length < 8) {
+          Swal.showValidationMessage("Password must be at least 8 characters long");
+          return false;
+        }
+        return { old_password, new_password };
+      }
+    });
+
+    if (!formValues) return;
+
+    try {
+      const res = await fetch(`${baseUrl}/change_password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(formValues)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Password Updated!",
+          text: data.message,
+          background: "#f0fff4",
+          color: "#2f855a",
+          confirmButtonColor: "#38a169"
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: data.message,
+          background: "#fff0f5",
+          color: "#d63384",
+          confirmButtonColor: "#ff69b4"
+        });
+      }
+    } catch (err){
+      console.error(err);
+      Swal.fire("Error", "Something went wrong. Please try again.", "error");
+    }
+  }
+
+  async function logout() {
+    await fetch(`${baseUrl}/logout`, { credentials: "include" });
+    Swal.fire({
+      icon: "info",
+      title: "Logged Out",
+      text: "You’ve been logged out successfully.",
+      confirmButtonColor: "#ff69b4",
+      background: "#fff0f5",
+      color: "#d63384"
+    }).then(() => (window.location.href = "/"));
+  }
+
+  loadDashboard();
+  </script>
+</body>
+</html>

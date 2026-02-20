@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Girl, who is you?</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="login-bg">
+  <div class="content-box">
+    <input id="email" type="email" placeholder="Enter your email" />
+    <input id="password" type="password" placeholder="Enter your password" />
+
+    <h3 id="challenge">Loading your drawing challenge...</h3>
+
+    <canvas id="canvas" width="250" height="250"></canvas><br/>
+
+    <div class="buttons">
+      <button onclick="clearCanvas()" class="secondary">Clear</button>
+      <button onclick="submitCaptcha()">Verify</button>
+    </div>
+
+    <p id="result"></p>
+  </div>
+
+  <div class="links-outside">
+    <p>New here? <a href="/signup">Create an account</a></p>
+    <p><a href="/forgot">Forgot your password?</a></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

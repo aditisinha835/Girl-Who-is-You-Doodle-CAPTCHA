@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - Girl, who is you?</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="signup-bg">
+  <div class="content-box">
+    <h1>Create Your Account</h1>
+
+    <div id="signup-container">
+      <input id="name" type="text" placeholder="Full Name" />
+      <input id="email" type="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Password (min. 8 characters)" />
+
+      <label for="security-question" style="font-weight: 600; font-size: 1.1rem; color: var(--theme-teal);">
+        Select a Security Question:
+      </label>
+      <select id="security-question">
+        <option value="" disabled selected>-- Choose a question --</option>
+        <option value="What’s your pet’s name?">What’s your pet’s name?</option>
+        <option value="What city were you born in?">What city were you born in?</option>
+        <option value="What’s your favorite color?">What’s your favorite color?</option>
+        <option value="What’s your dream job?">What’s your dream job?</option>
+      </select>
+
+      <input id="security-answer" type="text" placeholder="Your Answer" />
+
+      <button onclick="signup()">Sign Up</button>
+      <p id="signup-result"></p>
+
+      <p>Already have an account? <a href="/">Login here</a></p>
+    </div>
+  </div>
+
+  <script>
+  const baseUrl = "http://127.0.0.1:5000";
+
+  async function signup() {
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const question = document.getElementById("security-question").value;
+    const answer = document.getElementById("security-answer").value.trim();
+
+    if (!name || !email || !password || !question || !answer) {
+      Swal.fire("Missing Info", "Please fill all fields.", "warning");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${baseUrl}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name, email, password, security_question: question, security_answer: answer })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        Swal.fire("Success!", "Signup successful. You can now log in!", "success")
+          .then(() => window.location.href = "/");
+      } else {
+        Swal.fire("Error", data.message, "error");
+      }
+    } catch (err) {
+      Swal.fire("Server Error", "Unable to connect to the backend.", "error");
+      console.error(err);
+    }
+  }
+  </script>
+</body>
+</html>

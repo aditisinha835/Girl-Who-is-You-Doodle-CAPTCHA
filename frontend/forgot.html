@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Forgot Password - Girl, who is you?</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="forgot-bg">
+  <div class="content-box">
+    <p>Enter your email to retrieve your security question.</p>
+
+    <input type="email" id="email" placeholder="Email" />
+    <button id="getQuestionBtn" class="secondary">Get Security Question</button>
+
+    <div id="security-section" style="display:none; margin-top:20px;">
+      <p id="questionText" style="font-weight: 600; font-size: 1.1rem; color: var(--theme-teal);"></p>
+      <input type="text" id="answer" placeholder="Your Answer" />
+      <input type="password" id="newPassword" placeholder="New Password (min. 8 characters)" />
+      <button id="resetBtn">Reset Password</button>
+    </div>
+
+    <p style="margin-top:20px;">
+      <a href="/">Back to Login</a>
+    </p>
+  </div>
+
+  <script>
+  const baseUrl = "http://127.0.0.1:5000";
+
+  document.getElementById("getQuestionBtn").addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    if (!email) {
+      Swal.fire("Missing Info", "Please enter your email.", "warning");
+      return;
+    }
+
+    const res = await fetch(`${baseUrl}/forgot_password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+      credentials: "include"
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById("security-section").style.display = "block";
+      document.getElementById("questionText").innerText = data.question;
+    } else {
+      Swal.fire("Error", data.message, "error");
+    }
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const security_answer = document.getElementById("answer").value.trim();
+    const new_password = document.getElementById("newPassword").value.trim();
+
+    if (!security_answer || !new_password) {
+      Swal.fire("Missing Info", "Please fill all fields.", "warning");
+      return;
+    }
+
+    const res = await fetch(`${baseUrl}/reset_password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, security_answer, new_password }),
+      credentials: "include"
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "Password Reset!",
+        text: data.message,
+        confirmButtonText: "Go to Login"
+      }).then(() => window.location.href = "/");
+    } else {
+      Swal.fire("Error", data.message, "error");
+    }
+  });
+  </script>
+</body>
+</html>

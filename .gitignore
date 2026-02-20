@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtualenv
+venv/
+.env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# Node (if any)
+node_modules/
+
+# Mongo (if any local dump)
+dump/
+
+# Secrets
+*.pem
+*.key
+*.pfx
