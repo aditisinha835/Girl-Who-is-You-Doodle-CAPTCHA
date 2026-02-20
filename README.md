@@ -1,31 +1,31 @@
 Overview
 This project introduces a dual-layer verification pipeline:
 1. Behavioral Verification (Process-level):
--> Analyzes stroke timing, speed variance, path length, and drawing duration.
--> Rejects bot-like patterns before invoking ML inference.
+- Analyzes stroke timing, speed variance, path length, and drawing duration.
+- Rejects bot-like patterns before invoking ML inference.
 2. Image Recognition (Outcome-level):
--> Uses a pre-trained MobileNetV2-based doodle classifier.
--> Confirms that the final drawing matches the challenge prompt.
+- Uses a pre-trained MobileNetV2-based doodle classifier.
+- Confirms that the final drawing matches the challenge prompt.
 Only submissions passing both layers are accepted.
 
 Architecture
 Frontend:
--> HTML5 Canvas for drawing input
--> JavaScript captures:
-- (x, y) coordinates
-- timestamps
-- speed variance
-- pressure data (Pointer Events API)
-- Sends Base64 image + path data via Fetch API
+- HTML5 Canvas for drawing input
+- JavaScript captures:
+  - (x, y) coordinates
+  - timestamps
+  - speed variance
+  - pressure data (Pointer Events API)
+  - Sends Base64 image + path data via Fetch API
 Backend:
--> Flask API for:
-- Challenge generation
-- CAPTCHA verification
-- Authentication & sessions
-- Dashboard analytics
-- Behavioral heuristics engine
-- TensorFlow/Keras model integration (inference only)
--> MongoDB for persistent user data storage
+- Flask API for:
+  - Challenge generation
+  - CAPTCHA verification
+  - Authentication & sessions
+  - Dashboard analytics
+  - Behavioral heuristics engine
+  - TensorFlow/Keras model integration (inference only)
+- MongoDB for persistent user data storage
 
 Tech Stack
 Frontend:
